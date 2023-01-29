@@ -1,3 +1,5 @@
+from _warnings import filters
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.sites.shortcuts import get_current_site
