@@ -1,16 +1,19 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import send_mail
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
+from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.views import generic
 from django.views.generic import ListView, TemplateView
 
-from app.form import ContactForm, LoginForm, RegisterForm, send_email
+from app.form import ContactForm, LoginForm, RegisterForm
 from app.models import Product, User
 # from token import account_activation_token
 
@@ -69,7 +72,6 @@ def login_view(request):
 
     return render(request, 'app/login.html', {'form':form})
 
-#
 
 def logout_view(request):
     logout(request)
@@ -82,54 +84,52 @@ class blogPage(ListView):
     queryset = Product.objects.all()
     context_object_name = 'products'
 
-
+#
+# def register_view(request):
+#     form = RegisterForm()
+#     if request.method == "POST":
+#         form = RegisterForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             send_email(form.data.get('email'), request, 'register')
+#             messages.add_message(
+#                 request,
+#                 level=messages.INFO,
+#                 message='Xabar yuborildi, emailingizni tekshiring'
+#             )
+#             return redirect('register')
+#     return render(request, 'app/register.html', {'form': form})
+#
 def register_view(request):
     form = RegisterForm()
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            send_email(form.data.get('email'), request, 'register')
-            messages.add_message(
-                request,
-                level=messages.INFO,
-                message='Xabar yuborildi, emailingizni tekshiring'
-            )
-            return redirect('register')
-    return render(request, 'app/register.html', {'form': form})
+        return redirect('login')
+    return render(request, 'app/register.html', {'form':form})
 
 
-class ActivateEmailView(TemplateView):
-    template_name = 'app/confrim.html'
 
-    def get(self, request, *args, **kwargs):
-        uid = kwargs.get('uid')
-        token = kwargs.get('token')
 
-        try:
-            uid = force_str(urlsafe_base64_decode(uid))
-            user = User.objects.get(pk=uid)
-        except Exception as e:
-            print(e)
-            user = None
-        if user is not None and account_activation_token.check_token(user, token):
-            user.is_active = True
-            user.save()
-            login(request, user)
-            messages.add_message(
-                request=request,
-                level=messages.SUCCESS,
-                message="Your account successfully activated!"
-            )
-            return redirect('index')
-        else:
-            return HttpResponse('Activation link is invalid!')
+
 class BlogSearchView(ListView):
-    model = Product
     template_name = 'app/blog.html'
-    context_object_name = 'posts'
-
+    model = Product
+    queryset = Product.objects.all()
+    context_object_name = 'products'
 
     def get_queryset(self):
-        query =self.request.GET.get('q')
-        return Product.objects.filter(text__icontains=query).order_by('text')
+        title = self.request.GET.get('title')
+        if title:
+            return Product.objects.filter(title__icontains=title)
+
+
+class Register(generic.CreateView):
+    from_class = UserCreationForm
+    success_url = reverse_lazy('index')
+    template_name = 'app/register.html'
+
+
+
+

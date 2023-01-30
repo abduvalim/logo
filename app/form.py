@@ -1,17 +1,20 @@
 from _warnings import filters
 
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.forms import ModelForm, CharField, EmailField
 from django.forms import Form
 from django.template.loader import render_to_string
+from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 # from logo.settings import EMAIL_HOST_USER
+from django.views import generic
+
 from app.models import Product, Contact, User
 # from token import account_activation_token
 

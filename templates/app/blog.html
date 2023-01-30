@@ -86,7 +86,7 @@
               <div class="recent-posts pt-5">
                   <form action="{% url 'search_blogs' %}" method="get">
     {% csrf_token %}
-    <input type="text" name="q" placeholder="Search blog">
+    <input type="text" name="title" placeholder="Search blog">
     <button type="submit">Search</button>
 </form>
                 <h4 class="mb-3">RECENT POSTS</h4>
